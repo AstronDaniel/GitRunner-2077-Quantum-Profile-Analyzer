@@ -1,0 +1,307 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GitRunner 2077</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600;700&family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              mono: ['"Fira Code"', 'monospace'],
+              display: ['"Orbitron"', 'sans-serif'],
+              tech: ['"Rajdhani"', 'sans-serif'],
+            },
+            colors: {
+              cyber: {
+                black: '#020205', // Slightly blueish black
+                dark: '#050510',
+                green: '#00ff41', // Classic matrix (accent)
+                blue: '#2de2e6',  // Cyan/Blue
+                blueDim: 'rgba(45, 226, 230, 0.1)',
+                purple: '#bc13fe', // Neon Purple
+                pink: '#ff0099',
+                yellow: '#fcee0a',
+              }
+            },
+            animation: {
+              'spin-slow': 'spin 8s linear infinite',
+              'spin-reverse': 'spin 6s linear infinite reverse',
+              'pulse-fast': 'pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+              'glitch': 'glitch 1s linear infinite',
+              'scanline': 'scanline 3s linear infinite',
+              'blink': 'blink 1s step-end infinite',
+              'fade-in-up': 'fadeInUp 0.5s ease-out forwards',
+              'grid-flow': 'gridFlow 20s linear infinite',
+              'float': 'float 6s ease-in-out infinite',
+              'breathing': 'breathing 4s ease-in-out infinite',
+              'vs-slide-left': 'vsSlideLeft 1s cubic-bezier(0.2, 0.8, 0.2, 1) forwards',
+              'vs-slide-right': 'vsSlideRight 1s cubic-bezier(0.2, 0.8, 0.2, 1) forwards',
+              'vs-clash': 'vsClash 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) 0.8s forwards',
+            },
+            keyframes: {
+              glitch: {
+                '2%, 64%': { transform: 'translate(2px,0) skew(0deg)' },
+                '4%, 60%': { transform: 'translate(-2px,0) skew(0deg)' },
+                '62%': { transform: 'translate(0,0) skew(5deg)' },
+              },
+              scanline: {
+                '0%': { transform: 'translateY(-100%)' },
+                '100%': { transform: 'translateY(100%)' },
+              },
+              blink: {
+                '0%, 100%': { opacity: '1' },
+                '50%': { opacity: '0' },
+              },
+              fadeInUp: {
+                '0%': { opacity: '0', transform: 'translateY(20px)' },
+                '100%': { opacity: '1', transform: 'translateY(0)' },
+              },
+              gridFlow: {
+                '0%': { backgroundPosition: '0 0' },
+                '100%': { backgroundPosition: '0 40px' }
+              },
+              float: {
+                '0%, 100%': { transform: 'translateY(0)' },
+                '50%': { transform: 'translateY(-20px)' },
+              },
+              breathing: {
+                '0%, 100%': { opacity: '0.4' },
+                '50%': { opacity: '0.8' },
+              },
+              vsSlideLeft: {
+                '0%': { transform: 'translateX(-100%)', opacity: '0' },
+                '100%': { transform: 'translateX(0)', opacity: '1' }
+              },
+              vsSlideRight: {
+                '0%': { transform: 'translateX(100%)', opacity: '0' },
+                '100%': { transform: 'translateX(0)', opacity: '1' }
+              },
+              vsClash: {
+                '0%': { transform: 'scale(3)', opacity: '0' },
+                '100%': { transform: 'scale(1)', opacity: '1' }
+              }
+            }
+          },
+        },
+      }
+    </script>
+    <style>
+      body {
+        background-color: #020205;
+        color: #e0e0e0;
+        overflow-x: hidden;
+        margin: 0;
+      }
+      /* Custom scrollbar */
+      ::-webkit-scrollbar {
+        width: 6px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #050510;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #2de2e6;
+        border-radius: 0px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #bc13fe;
+      }
+      .crt-overlay {
+        background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+        background-size: 100% 2px, 3px 100%;
+        pointer-events: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: 9999;
+      }
+      
+      /* New Dynamic Background */
+      .cyber-bg-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+        background: radial-gradient(circle at 50% 50%, #1a1a2e 0%, #020205 100%);
+        overflow: hidden;
+        perspective: 1000px;
+      }
+
+      /* Starfield (Parallax Simulation) */
+      .stars {
+        width: 1px;
+        height: 1px;
+        background: transparent;
+        box-shadow: 1744px 122px #FFF , 134px 1321px #FFF , 92px 859px #FFF;
+        animation: animStar 50s linear infinite;
+      }
+      .stars2 {
+        width: 2px;
+        height: 2px;
+        background: transparent;
+        box-shadow: 1744px 122px #FFF , 134px 1321px #FFF , 92px 859px #FFF;
+        animation: animStar 100s linear infinite;
+      }
+      @keyframes animStar {
+        from { transform: translateY(0px); }
+        to { transform: translateY(-2000px); }
+      }
+
+      /* 3D Floor Grid */
+      .cyber-grid {
+        position: absolute;
+        width: 300%;
+        height: 200%;
+        bottom: -100%;
+        left: -100%;
+        background-image: 
+          linear-gradient(rgba(45, 226, 230, 0.15) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(188, 19, 254, 0.15) 1px, transparent 1px);
+        background-size: 60px 60px;
+        transform: rotateX(75deg) translateY(0);
+        animation: gridFlow 6s linear infinite;
+        mask-image: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,1) 30%);
+      }
+
+      .cyber-fog {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(circle at 50% 100%, rgba(45, 226, 230, 0.1), transparent 60%);
+        pointer-events: none;
+      }
+
+      /* Mech Silhouette in Background */
+      .mech-bg {
+        position: absolute;
+        bottom: -5%;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 80vw;
+        height: 60vh;
+        background: linear-gradient(to top, #050510 10%, rgba(10, 10, 30, 0.8) 100%);
+        clip-path: polygon(
+          20% 100%, 25% 60%, 35% 40%, 30% 10%, 40% 0, 60% 0, 70% 10%, 65% 40%, 75% 60%, 80% 100%,
+          60% 100%, 60% 80%, 40% 80%, 40% 100%
+        );
+        opacity: 0.3;
+        z-index: -1;
+        pointer-events: none;
+      }
+
+      .mech-eyes {
+        position: absolute;
+        bottom: 45vh;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 200px;
+        height: 10px;
+        display: flex;
+        justify-content: space-between;
+        opacity: 0.5;
+        z-index: -1;
+      }
+      .mech-eye {
+        width: 40px;
+        height: 4px;
+        background: #2de2e6;
+        box-shadow: 0 0 10px #2de2e6;
+        animation: blink 5s infinite;
+      }
+
+      .glitch-text {
+        position: relative;
+      }
+      .glitch-text::before,
+      .glitch-text::after {
+        content: attr(data-text);
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+      }
+      .glitch-text::before {
+        left: 2px;
+        text-shadow: -1px 0 #bc13fe;
+        clip: rect(24px, 550px, 90px, 0);
+        animation: glitch-anim-2 3s infinite linear alternate-reverse;
+      }
+      .glitch-text::after {
+        left: -2px;
+        text-shadow: -1px 0 #2de2e6;
+        clip: rect(85px, 550px, 140px, 0);
+        animation: glitch-anim 2.5s infinite linear alternate-reverse;
+      }
+      @keyframes glitch-anim {
+        0% { clip: rect(30px, 9999px, 10px, 0); }
+        50% { clip: rect(80px, 9999px, 50px, 0); }
+        100% { clip: rect(10px, 9999px, 90px, 0); }
+      }
+      @keyframes glitch-anim-2 {
+        0% { clip: rect(60px, 9999px, 90px, 0); }
+        50% { clip: rect(10px, 9999px, 40px, 0); }
+        100% { clip: rect(50px, 9999px, 20px, 0); }
+      }
+      
+      .clip-path-tech {
+        clip-path: polygon(10% 0, 100% 0, 100% 70%, 90% 100%, 0 100%, 0 30%);
+      }
+      .clip-path-button {
+        clip-path: polygon(15% 0, 100% 0, 100% 100%, 0 100%, 0 35%);
+      }
+      
+      .perspective-container {
+        transform-style: preserve-3d;
+        perspective: 1000px;
+      }
+      .perspective-text {
+        transform: rotateX(25deg) scale(0.9);
+        transform-origin: center top;
+        opacity: 0.8;
+      }
+      
+      /* 3D Tilt Card Utilities */
+      .tilt-card-inner {
+        transform-style: preserve-3d;
+        transition: transform 0.1s ease-out;
+      }
+      .tilt-depth-10 {
+        transform: translateZ(10px);
+      }
+      .tilt-depth-20 {
+        transform: translateZ(20px);
+      }
+      .tilt-depth-30 {
+        transform: translateZ(30px);
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.554.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.30.0",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "recharts": "https://aistudiocdn.com/recharts@^3.4.1"
+  }
+}
+</script>
+</head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>
